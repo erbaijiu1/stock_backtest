@@ -1,7 +1,11 @@
 #!/bin/sh
 
 #清除缓存数据
-rm -rf /data/InStock/instock/cache/hist/*
+#rm -rf /data/InStock/instock/cache/hist/*
+
+find /root/server_release/stock_backtest/instock/cache/hist -type f -mtime +30 -delete
+find /root/server_release/stock_backtest/instock/cache/hist -type d -empty -mtime +30 -delete
+
 #MONTH=`date -d '' +%Y%m`
 #cd /data/InStock/instock/cache/hist && rm -rf !(${MONTH})
 #DATE=`date -d '' +%Y-%m-%d`
