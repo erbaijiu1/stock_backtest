@@ -72,7 +72,7 @@ def main():
     tornado.options.options.logging = None
 
     http_server = tornado.httpserver.HTTPServer(Application())
-    port = 9988
+    port = 9090
     http_server.listen(port)
 
     print(f"服务已启动，web地址 : http://localhost:{port}/")
