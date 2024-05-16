@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pandas as pd
 import talib as tl
 
 __author__ = 'myh '
@@ -36,3 +37,23 @@ def check(code_name, data, date=None, threshold=30):
         return True
     else:
         return False
+
+
+def test_Ma():
+    # 示例数据
+    data = pd.DataFrame({
+        'date': pd.date_range(start='2023-01-01', periods=100, freq='D'),
+        'close': np.random.random(100) * 100  # 随机生成100个收盘价
+    })
+
+    # 计算30日移动平均线
+    data.loc[:, 'ma30'] = tl.MA(data['close'].values, timeperiod=30)
+
+    # 将NaN值替换为0.0
+    data['ma30'].values[np.isnan(data['ma30'].values)] = 0.0
+
+    print(data.head(40))  # 查看前35行结果
+
+
+if __name__ == '__main__':
+    test_Ma()
