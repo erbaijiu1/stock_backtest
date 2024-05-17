@@ -36,7 +36,8 @@ def check_box_range(data, period=90):
 
 def one_bull_nine_bears(code_name, data, date=None, threshold=60):
     if date is None:
-        end_date = data['date'].iloc[-1]
+        # end_date = data['date'].iloc[-1]
+        end_date = code_name[0]
     else:
         end_date = date.strftime("%Y-%m-%d")
 
@@ -50,18 +51,33 @@ def one_bull_nine_bears(code_name, data, date=None, threshold=60):
     data['ma60'] = tl.MA(data['close'].values, timeperiod=60)
     data['ma60'].values[np.isnan(data['ma60'].values)] = 0.0
 
+    #  60日平均成交量
+    data.loc[:, 'vol_ma60'] = tl.MA(data['volume'].values, timeperiod=60)
+    data['vol_ma60'].values[np.isnan(data['vol_ma60'].values)] = 0.0
+
+    # 9阴还是多少阴，通过配置
+    step = 7
+    check_days_before_today = 30
+
     # 检查1阳吃9阴
-    if len(data) < 10:
+    if len(data) < step:
         return False
 
-    for i in range(9, len(data)):
-        recent_10_days = data.iloc[i - 9:i + 1]
-        if (recent_10_days['close'].values[-1] > recent_10_days['open'].values[-1] * 1.02 and  # 大阳线
-                recent_10_days['close'].values[-1] > recent_10_days['high'].values[:-1].max() and  # 包含前9根阴线
-                (recent_10_days['close'].values[:-1] < recent_10_days['open'].values[:-1]).all()):  # 前9根都是阴线
-            if check_volume(data, datetime.strptime(recent_10_days['date'].values[-1], '%Y-%m-%d'),
-                            threshold=threshold):
-                if check_box_range(data, period=30):
-                    return True
+    for i in range(len(data)-check_days_before_today, len(data)):
+        recent_10_days = data.iloc[i-step:i]
+        if (recent_10_days['close'].values[-1] > recent_10_days['open'].values[-2] * 1.03 and  # 大阳线,是相对前一天, 3个点以上
+                recent_10_days['close'].values[-1] > recent_10_days['close'].values[:-1].max()  # 最后一天大于前面的所有的收盘
+                and (recent_10_days['close'].values[:-1] < recent_10_days['open'].values[:-1]).all()):  # 前9根都是阴线
+
+            # if today vol is begger than vol ma60
+            if recent_10_days['volume'].values[-1] <= recent_10_days['vol_ma60'].values[-1] * 1.5:
+                continue
+
+            # if check_box_range(data, period=30):
+            #     print(f"haha , i got you.{code_name[1]}, {recent_10_days}")
+            #     return True
+
+            print(f"haha , i got you.{code_name[1]}, {recent_10_days}")
+            return True
 
     return False

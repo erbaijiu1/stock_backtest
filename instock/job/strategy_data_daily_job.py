@@ -89,6 +89,17 @@ def main():
             executor.submit(runt.run_with_args, prepare, strategy)
 
 
+def test_one_strategy():
+    # 使用方法传递。
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        for strategy in tbs.TABLE_CN_STOCK_STRATEGIES:
+            executor.submit(runt.run_with_args, prepare, strategy)
+            print("try one strategy")
+            break
+
 # main函数入口
 if __name__ == '__main__':
-    main()
+    # main()
+
+    test_one_strategy()
+

@@ -4,7 +4,7 @@
 from sqlalchemy import DATE, NVARCHAR, FLOAT, BIGINT, SmallInteger, DATETIME
 from sqlalchemy.dialects.mysql import BIT
 import talib as tl
-from instock.core.strategy import enter
+from instock.core.strategy import enter, one_bull_engulfing_nine_bears
 from instock.core.strategy import turtle_trade
 from instock.core.strategy import climax_limitdown
 from instock.core.strategy import low_atr
@@ -366,6 +366,8 @@ TABLE_CN_STOCK_INDICATORS_SELL = {'name': 'cn_stock_indicators_sell', 'cn': '股
                                   'columns': _tmp_columns}
 
 TABLE_CN_STOCK_STRATEGIES = [
+    {'name': 'cn_stock_strategy_one_bull_nine_bears', 'cn': '一阳吞九阴', 'size': 70, 'func': one_bull_engulfing_nine_bears.one_bull_nine_bears,
+     'columns': _tmp_columns},
     {'name': 'cn_stock_strategy_enter', 'cn': '放量上涨', 'size': 70, 'func': enter.check_volume,
      'columns': _tmp_columns},
     {'name': 'cn_stock_strategy_keep_increasing', 'cn': '均线多头', 'size': 70, 'func': keep_increasing.check,
