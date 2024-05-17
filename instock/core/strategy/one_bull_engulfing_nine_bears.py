@@ -63,6 +63,7 @@ def one_bull_nine_bears(code_name, data, date=None, threshold=60):
     if len(data) < step:
         return False
 
+    # 是要1吃9，不是要1吃9阴，后面还要再调整一下
     for i in range(len(data)-check_days_before_today, len(data)):
         recent_10_days = data.iloc[i-step:i]
         if (recent_10_days['close'].values[-1] > recent_10_days['open'].values[-2] * 1.03 and  # 大阳线,是相对前一天, 3个点以上
