@@ -43,27 +43,6 @@ def save_nph_stock_top_data(date, before=True):
     stock_spot_buy(date)
 
 
-# 每日股票大宗交易
-def save_stock_blocktrade_data(date):
-    try:
-        data = stf.fetch_stock_blocktrade_data(date)
-        if data is None or len(data.index) == 0:
-            return
-
-        table_name = tbs.TABLE_CN_STOCK_BLOCKTRADE['name']
-        # 删除老数据。
-        if mdb.checkTableIsExist(table_name):
-            del_sql = f"DELETE FROM `{table_name}` where `date` = '{date}'"
-            mdb.executeSql(del_sql)
-            cols_type = None
-        else:
-            cols_type = tbs.get_field_types(tbs.TABLE_CN_STOCK_BLOCKTRADE['columns'])
-
-        mdb.insert_db_from_df(data, table_name, cols_type, False, "`date`,`code`")
-    except Exception as e:
-        logging.error(f"basic_data_other_daily_job.save_stock_blocktrade_data处理异常：{e}")
-
-
 # 每日股票资金流向
 def save_nph_stock_fund_flow_data(date, before=True):
     if before:
@@ -129,10 +108,11 @@ def save_nph_stock_sector_fund_flow_data(date, before=True):
     if before:
         return
 
-    times = tuple(range(2))
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(times)) as executor:
-        {executor.submit(stock_sector_fund_flow_data, date, k): k for k in times}
-
+    # times = tuple(range(2))
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=len(times)) as executor:
+    #     {executor.submit(stock_sector_fund_flow_data, date, k): k for k in times}
+    stock_sector_fund_flow_data(date, 0)
+    stock_sector_fund_flow_data(date, 1)
 
 def stock_sector_fund_flow_data(date, index_sector):
     try:
@@ -246,7 +226,6 @@ def stock_spot_buy(date):
 
 def main():
     runt.run_with_args(save_nph_stock_top_data)
-    runt.run_with_args(save_stock_blocktrade_data)
     runt.run_with_args(save_nph_stock_bonus)
     runt.run_with_args(save_nph_stock_fund_flow_data)
     runt.run_with_args(save_nph_stock_sector_fund_flow_data)
