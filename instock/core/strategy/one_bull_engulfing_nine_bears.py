@@ -51,13 +51,16 @@ def one_bull_nine_bears(code_name, data, date=None, threshold=60):
     data['ma60'] = tl.MA(data['close'].values, timeperiod=60)
     data['ma60'].values[np.isnan(data['ma60'].values)] = 0.0
 
+    data['ma120'] = tl.MA(data['close'].values, timeperiod=120)
+    data['ma120'].values[np.isnan(data['ma120'].values)] = 0.0
+
     #  60日平均成交量
     data.loc[:, 'vol_ma60'] = tl.MA(data['volume'].values, timeperiod=60)
     data['vol_ma60'].values[np.isnan(data['vol_ma60'].values)] = 0.0
 
     # 9阴还是多少阴，通过配置
-    step = 7
-    check_days_before_today = 30
+    step = 10
+    check_days_before_today = 1
 
     # 检查1阳吃9阴
     if len(data) < step:
@@ -66,19 +69,23 @@ def one_bull_nine_bears(code_name, data, date=None, threshold=60):
     # 是要1吃9，不是要1吃9阴，后面还要再调整一下
     for i in range(len(data)-check_days_before_today, len(data)):
         recent_10_days = data.iloc[i-step:i]
-        if (recent_10_days['close'].values[-1] > recent_10_days['open'].values[-2] * 1.03 and  # 大阳线,是相对前一天, 3个点以上
+        if (recent_10_days['close'].values[-1] > recent_10_days['open'].values[-2] * 1.05 and  # 大阳线,是相对前一天, 3个点以上
                 recent_10_days['close'].values[-1] > recent_10_days['close'].values[:-1].max()  # 最后一天大于前面的所有的收盘
-                and (recent_10_days['close'].values[:-1] < recent_10_days['open'].values[:-1]).all()):  # 前9根都是阴线
+            ): # and (recent_10_days['close'].values[:-1] < recent_10_days['open'].values[:-1]).all()):  # 前9根都是阴线
 
             # if today vol is begger than vol ma60
             if recent_10_days['volume'].values[-1] <= recent_10_days['vol_ma60'].values[-1] * 1.5:
+                continue
+            # if today vol is bigger than vol ma120
+            if recent_10_days['close'].values[:-1].max() > recent_10_days['ma120'].values[-1]:
                 continue
 
             # if check_box_range(data, period=30):
             #     print(f"haha , i got you.{code_name[1]}, {recent_10_days}")
             #     return True
 
-            print(f"haha , i got you.{code_name[1]}, {recent_10_days}")
+            # print(f"haha , i got you.{code_name[1]}, {recent_10_days}")
+            print(f"haha , i got you.{code_name[1]}")
             return True
 
     return False
